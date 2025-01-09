@@ -198,17 +198,34 @@ class AdminQuestionView(APIView):
         except Quiz.DoesNotExist:
             return Response({"error": "Quiz not found"}, status=status.HTTP_404_NOT_FOUND)
 
+    # def post(self, request, quiz_id):
+    #     try:
+    #         Quiz.objects.get(id=quiz_id)
+    #         serializer = QuestionSerializer(data=request.data)
+    #         if serializer.is_valid():
+    #             serializer.save()
+    #             return Response(serializer.data, status=status.HTTP_201_CREATED)
+    #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    #     except Quiz.DoesNotExist:
+    #         return Response({"error": "Quiz not found"}, status=status.HTTP_404_NOT_FOUND)
     def post(self, request, quiz_id):
         try:
-            Quiz.objects.get(id=quiz_id)
-            serializer = QuestionSerializer(data=request.data)
+            # Check if the quiz exists
+            quiz = Quiz.objects.get(id=quiz_id)
+            
+            # Add the `quiz_id` to the request data
+            data = request.data.copy()
+            data['quiz_id'] = quiz.id  # Attach the quiz_id explicitly
+            
+            # Pass the modified data to the serializer
+            serializer = QuestionSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Quiz.DoesNotExist:
             return Response({"error": "Quiz not found"}, status=status.HTTP_404_NOT_FOUND)
-
+        
     def put(self, request, question_id):
         try:
             question = Question.objects.get(id=question_id)
